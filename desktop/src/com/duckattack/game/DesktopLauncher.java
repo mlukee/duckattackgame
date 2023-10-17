@@ -10,6 +10,7 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("DuckAttack");
+		config.setWindowedMode(720,720);
 		new Lwjgl3Application(new DuckAttack(), config);
 	}
 }
