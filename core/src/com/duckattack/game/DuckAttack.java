@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -131,7 +130,6 @@ public class DuckAttack extends ApplicationAdapter {
         boolean isRightPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT) || (Gdx.input.isTouched() && Gdx.input.getX() >= Gdx.graphics.getWidth() / 2);
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !isBulletFired) spawnBullet();
 
-
         // Determine the movement direction
         if (isLeftPressed) {
             isMovingLeft = true;
@@ -153,7 +151,6 @@ public class DuckAttack extends ApplicationAdapter {
         if (elapsedTime - duckSpawnTime > DUCK_SPAWN_TIME) spawnDuck();
         if (elapsedTime - appleSpawnTime > APPLE_SPAWN_TIME) spawnApple();
 
-
         for (Iterator<Rectangle> it = ducks.iterator(); it.hasNext(); ) {
             Rectangle duck = it.next();
             duck.y -= DUCK_SPEED * delta;
@@ -162,7 +159,7 @@ public class DuckAttack extends ApplicationAdapter {
             }
             if (duck.overlaps(worm)) {
                 health -= DUCK_DAMAGE;
-                if(health <= 0){
+                if (health <= 0) {
                     it.remove();
                     return;
                 }
@@ -237,7 +234,7 @@ public class DuckAttack extends ApplicationAdapter {
 
         font.setColor(Color.RED);
         font.draw(batch, "HEALTH: " + health, 20f, Gdx.graphics.getHeight() - 20f);
-        font.draw(batch, "HEALTH: " + health, 20f-1, Gdx.graphics.getHeight() - 20f);
+        font.draw(batch, "HEALTH: " + health, 20f - 1, Gdx.graphics.getHeight() - 20f);
 
         font.setColor(Color.SLATE);
         font.draw(batch,
@@ -266,7 +263,7 @@ public class DuckAttack extends ApplicationAdapter {
     private void spawnDuck() {
         Rectangle duck = new Rectangle();
         duck.x = MathUtils.random(0, Gdx.graphics.getWidth() - duckImg.getWidth());
-        duck.y = Gdx.graphics.getWidth();
+        duck.y = Gdx.graphics.getHeight();
         duck.width = duckImg.getWidth();
         duck.height = duckImg.getHeight();
         ducks.add(duck);
