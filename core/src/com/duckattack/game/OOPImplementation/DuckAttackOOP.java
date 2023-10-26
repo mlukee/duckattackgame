@@ -13,7 +13,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.duckattack.game.OOPImplementation.model.Apple;
 import com.duckattack.game.OOPImplementation.model.Assets;
@@ -26,9 +29,13 @@ public class DuckAttackOOP extends ApplicationAdapter {
     public Worm worm;
     public Bullet bullet;
     public Array<Duck> ducks;
+    private final Pool<Duck> duckPool = Pools.get(Duck.class, 3);
+
     public Array<Apple> apples;
+    private final Pool<Apple> applePool = Pools.get(Apple.class, 3);
     public static boolean isBulletFired = false;
     private boolean isGameOver = false;
+    private boolean isPaused = false;
 
     @Override
     public void create() {
@@ -38,11 +45,37 @@ public class DuckAttackOOP extends ApplicationAdapter {
         Assets.load();
         worm = new Worm(Gdx.graphics.getWidth() / 2f - Assets.wormImg.getWidth() / 2f, 20);
         ducks.add(Duck.spawnDuck());
+        duckPool.fill(1);
         apples.add(Apple.spawnApple());
+        applePool.fill(2);
     }
 
     @Override
     public void render() {
+        // ==== PAUSED ==== //
+        if(Gdx.input.isKeyJustPressed(Input.Keys.P)) isPaused = !isPaused;
+        if(isPaused){
+            batch.begin();
+            drawText(batch, Color.RED, "PAUSED", Gdx.graphics.getWidth() / 2f - 60f, Gdx.graphics.getHeight() / 2f);
+            batch.end();
+            return;
+        }
+
+        // ==== RESET ==== //
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+            health = 100;
+            applesCollected = 0;
+            ducksKilled = 0;
+            ducks.clear();
+            apples.clear();
+            worm = new Worm(Gdx.graphics.getWidth() / 2f - Assets.wormImg.getWidth() / 2f, 20);
+            ducks.add(Duck.spawnDuck());
+            duckPool.fill(1);
+            apples.add(Apple.spawnApple());
+            applePool.fill(2);
+            return;
+        }
+
         ScreenUtils.clear(0, 0, 0, 1);
         if (health > 0) update(Gdx.graphics.getDeltaTime());
         batch.begin();
@@ -56,6 +89,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
     }
 
     public void update(float delta) {
+        if (isPaused) return;
         worm.update(delta);
         if (isBulletFired) {
             bullet.update(delta);
@@ -68,8 +102,16 @@ public class DuckAttackOOP extends ApplicationAdapter {
             bullet = new Bullet(worm.bounds.x + worm.bounds.width / 2f - Assets.bulletImg.getWidth() / 2f, worm.bounds.y + worm.bounds.height);
         }
 
-        if (isTimeToSpawnNewDuck()) ducks.add(Duck.spawnDuck());
-        if (isTimeToSpawnNewApple()) apples.add(Apple.spawnApple());
+        if (isTimeToSpawnNewDuck()) {
+            Duck duck = duckPool.obtain();
+            duck.init(MathUtils.random(0, Gdx.graphics.getWidth() - Assets.duckImg.getWidth()), Gdx.graphics.getHeight());
+            ducks.add(Duck.spawnDuck());
+        }
+        if (isTimeToSpawnNewApple()) {
+            Apple apple = applePool.obtain();
+            apple.init(MathUtils.random(0, Gdx.graphics.getWidth() - Assets.appleImg.getWidth()), Gdx.graphics.getHeight());
+            apples.add(Apple.spawnApple());
+        }
 
         for (Duck duck : ducks) {
             duck.update(Gdx.graphics.getDeltaTime());
@@ -77,23 +119,34 @@ public class DuckAttackOOP extends ApplicationAdapter {
             if (worm.isCollisionWithDuck(duck)) {
                 if (health <= 0) return;
                 ducks.removeValue(duck, true);
+                duckPool.free(duck);
             }
 
-            if (isDuckOutOfBounds(duck)) ducks.removeValue(duck, true);
+            if (isDuckOutOfBounds(duck)) {
+                ducks.removeValue(duck, true);
+                duckPool.free(duck);
+            }
 
             if (isBulletFired && isDuckHitByBullet(duck, bullet)) {
                 Assets.duckVoice.play();
                 ducksKilled++;
                 ducks.removeValue(duck, true);
+                duckPool.free(duck);
                 isBulletFired = false;
             }
         }
 
         for (Apple apple : apples) {
             apple.update(Gdx.graphics.getDeltaTime());
-            if (worm.isCollisionWithApple(apple)) apples.removeValue(apple, true);
+            if (worm.isCollisionWithApple(apple)) {
+                applePool.free(apple);
+                apples.removeValue(apple, true);
+            }
 
-            if (isAppleOutOfBounds(apple)) apples.removeValue(apple, true);
+            if (isAppleOutOfBounds(apple)) {
+                apples.removeValue(apple, true);
+                applePool.free(apple);
+            }
         }
     }
 
@@ -123,5 +176,10 @@ public class DuckAttackOOP extends ApplicationAdapter {
         drawText(batch, Color.RED, "Health: " + health, 20f, Gdx.graphics.getHeight() - 20f);
         drawText(batch, Color.SLATE, "Score: " + applesCollected, 20f, Gdx.graphics.getHeight() - 50f);
         drawText(batch, Color.DARK_GRAY, "Ducks killed: " + ducksKilled, 20f, Gdx.graphics.getHeight() - 80f);
+
+        drawText(batch, Color.RED, "Ducks in pool: " + duckPool.getFree(), 20f, Gdx.graphics.getHeight() - 110f);
+        drawText(batch, Color.RED, "Duck Pool max size:" + duckPool.max, 20f, Gdx.graphics.getHeight() - 140f);
+        drawText(batch, Color.RED, "Apples in pool: " + applePool.getFree(), 20f, Gdx.graphics.getHeight() - 170f);
+        drawText(batch, Color.RED, "Apple Pool max size:" + applePool.max, 20f, Gdx.graphics.getHeight() - 200f);
     }
 }

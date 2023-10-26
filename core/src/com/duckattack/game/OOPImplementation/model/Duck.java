@@ -3,9 +3,10 @@ package com.duckattack.game.OOPImplementation.model;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.TimeUtils;
 
-public class Duck extends GameObject {
+public class Duck extends GameObject implements Pool.Poolable {
     private static final float DUCK_SPEED = 200;
     private static final float DUCK_SPAWN_TIME = 2;
     private static final float DUCK_DAMAGE = 25;
@@ -14,6 +15,15 @@ public class Duck extends GameObject {
 
     public Duck(float x, float y) {
         super(x, y, Assets.duckImg.getWidth(), Assets.duckImg.getHeight());
+    }
+
+//    public Duck(){
+//        super(MathUtils.random(0, Gdx.graphics.getWidth() - Assets.duckImg.getWidth()),Gdx.graphics.getHeight(),Assets.duckImg.getWidth(),Assets.duckImg.getHeight());
+//    }
+
+    public void init(float posX, float posY) {
+        position.set(posX, posY);
+        bounds.setPosition(posX, posY);
     }
 
     @Override
@@ -49,4 +59,9 @@ public class Duck extends GameObject {
         return new Duck(x, y);
     }
 
+    @Override
+    public void reset() {
+        this.bounds.x = MathUtils.random(0, Gdx.graphics.getWidth() - Assets.duckImg.getWidth());
+        this.bounds.y = Gdx.graphics.getHeight();
+    }
 }
