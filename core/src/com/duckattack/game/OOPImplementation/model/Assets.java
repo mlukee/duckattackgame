@@ -15,12 +15,15 @@ public class Assets {
     public static Sprite wormSprite;
     public static Texture appleImg;
     public static Texture bulletImg;
+    public static Texture goldenAppleImg;
     public static Texture bg;
 
     public static Sound duckVoice;
     public static Sound wormEat;
     public static Sound gameOver;
     public static Sound bulletSound;
+    public static Sound collected;
+    public static Sound wormHit;
 
     public static BitmapFont font;
 
@@ -36,6 +39,8 @@ public class Assets {
         duckImg = loadTexture("images/duck96.png");
         appleImg = loadTexture("images/apple72.png");
         bulletImg = loadTexture("images/bullet.png");
+        goldenAppleImg = loadTexture("images/goldenapple72.png");
+
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("arial.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -47,6 +52,8 @@ public class Assets {
         wormEat = Gdx.audio.newSound(Gdx.files.internal("sounds/eating.mp3"));
         gameOver = Gdx.audio.newSound(Gdx.files.internal("sounds/gameOver.mp3"));
         bulletSound = Gdx.audio.newSound(Gdx.files.internal("sounds/shoot.mp3"));
+        collected = Gdx.audio.newSound(Gdx.files.internal("sounds/collected.mp3"));
+        wormHit = Gdx.audio.newSound(Gdx.files.internal("sounds/wormHit.mp3"));
 
     }
 
@@ -66,6 +73,9 @@ public class Assets {
         wormEat.dispose();
         gameOver.dispose();
         bulletSound.dispose();
+        goldenAppleImg.dispose();
+        collected.dispose();
+        wormHit.dispose();
         font.dispose();
     }
 

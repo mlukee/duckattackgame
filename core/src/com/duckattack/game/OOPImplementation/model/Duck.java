@@ -17,9 +17,9 @@ public class Duck extends GameObject implements Pool.Poolable {
         super(x, y, Assets.duckImg.getWidth(), Assets.duckImg.getHeight());
     }
 
-//    public Duck(){
-//        super(MathUtils.random(0, Gdx.graphics.getWidth() - Assets.duckImg.getWidth()),Gdx.graphics.getHeight(),Assets.duckImg.getWidth(),Assets.duckImg.getHeight());
-//    }
+    public Duck(){
+        super(MathUtils.random(0, Gdx.graphics.getWidth() - Assets.duckImg.getWidth()),Gdx.graphics.getHeight(),Assets.duckImg.getWidth(),Assets.duckImg.getHeight());
+    }
 
     public void init(float posX, float posY) {
         position.set(posX, posY);

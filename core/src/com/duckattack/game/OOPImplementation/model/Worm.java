@@ -7,6 +7,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.TimeUtils;
 
 public class Worm extends GameObject {
     private boolean isMovingLeft = false;
@@ -14,6 +15,8 @@ public class Worm extends GameObject {
     public static int health;
     public static int applesCollected;
     public static int ducksKilled;
+    private float doublePointsDuration;
+
 
 
     public Worm(float x, float y) {
@@ -21,6 +24,8 @@ public class Worm extends GameObject {
         health = 100;
         applesCollected = 0;
         ducksKilled = 0;
+        doublePointsDuration = 0;
+
     }
 
     @Override
@@ -42,13 +47,33 @@ public class Worm extends GameObject {
         } else if (!isMovingLeft && Assets.wormSprite.isFlipX()) {
             Assets.wormSprite.setFlip(false, false);
         }
+        if (doublePointsDuration > 0) {
+            doublePointsDuration -= delta;
+            if (doublePointsDuration < 0) {
+                doublePointsDuration = 0;
+            }
+        }
 
+    }
+
+    public void activateDoublePoints() {
+        doublePointsDuration = 10;
+    }
+    public boolean isDoublePointsActive() {
+        return doublePointsDuration > 0;
     }
 
     public boolean isCollisionWithDuck(Duck duck) {
         if (this.bounds.overlaps(duck.bounds)) {
             health -= Duck.getDuckDamage();
-            if (health > 0) Assets.duckVoice.play();
+            if (health > 0) {
+                Assets.wormHit.play();
+                if (isDoublePointsActive()) {
+                    ducksKilled += 2;
+                } else {
+                    ducksKilled++;
+                }
+            }
             return true;
         }
         return false;
@@ -56,10 +81,23 @@ public class Worm extends GameObject {
 
     public boolean isCollisionWithApple(Apple apple) {
         if (this.bounds.overlaps(apple.bounds)) {
-            Assets.wormEat.play();
+            Assets.collected.play();
             health += Apple.getAppleHealthRegen();
             if (health > 100) health = 100;
-            applesCollected++;
+            if (isDoublePointsActive()) {
+                applesCollected += 2;
+            } else {
+                applesCollected++;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isCollisionWithGoldenApple(GoldenApple apple){
+        if(this.bounds.overlaps(apple.bounds)){
+            Assets.wormEat.play();
+            activateDoublePoints();
             return true;
         }
         return false;
