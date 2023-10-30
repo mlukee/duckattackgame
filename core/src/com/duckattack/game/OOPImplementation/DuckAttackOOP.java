@@ -86,7 +86,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
             if (worm.isCollisionWithGoldenApple(goldenApple)) {
                 goldenApple = null;
             }
-            else if (goldenApple.isAppleOutOfBounds()) {
+            if (goldenApple.isAppleOutOfBounds()) {
                 goldenApple = null;
             }
         }
@@ -214,7 +214,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
         ducks.clear();
         apples.clear();
         worm = new Worm(Gdx.graphics.getWidth() / 2f - Assets.wormImg.getWidth() / 2f, 20);
-        goldenApple.bounds.y = Gdx.graphics.getHeight();
+        goldenApple = null;
         ducks.add(Duck.spawnDuck());
         duckPool.fill(1);
         apples.add(Apple.spawnApple());
