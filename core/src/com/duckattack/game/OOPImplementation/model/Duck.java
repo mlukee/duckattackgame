@@ -40,8 +40,11 @@ public class Duck extends GameObject implements Pool.Poolable {
         return DUCK_DAMAGE;
     }
 
-    public static boolean isTimeToSpawnNewDuck(float delta) {
-        return (TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f) - duckSpawnTime - delta > DUCK_SPAWN_TIME;
+
+    public static boolean isTimeToSpawnNewDuck(float pauseDuration) {
+        float currentTimeInSeconds = TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f;
+        float effectiveGameTime = currentTimeInSeconds - pauseDuration;
+        return effectiveGameTime - duckSpawnTime > DUCK_SPAWN_TIME;
     }
 
     public static boolean isDuckOutOfBounds(Duck duck) {

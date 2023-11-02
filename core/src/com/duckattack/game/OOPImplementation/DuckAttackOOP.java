@@ -43,7 +43,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
     public static boolean isBulletFired = false;
 
     private float pauseStartTime;
-    private float pauseDuration;
+    private float pauseDuration=0;
 
     @Override
     public void create() {
@@ -53,7 +53,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
         Assets.load();
         worm = new Worm(Gdx.graphics.getWidth() / 2f - Assets.wormImg.getWidth() / 2f, 20);
         ducks.add(Duck.spawnDuck());
-        duckPool.fill(1);
+        duckPool.fill(2);
         apples.add(Apple.spawnApple());
         applePool.fill(2);
     }
@@ -176,12 +176,13 @@ public class DuckAttackOOP extends ApplicationAdapter {
 
     private void togglePauseState() {
         gameState = (gameState == GameState.PLAYING) ? GameState.PAUSED : GameState.PLAYING;
+
         if (gameState == GameState.PAUSED) {
-            float pauseEndTime = Gdx.graphics.getDeltaTime();
-            pauseDuration += pauseEndTime - pauseStartTime;
+            pauseStartTime = TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f;
+            pauseDuration = 0;
         } else {
-            pauseStartTime = Gdx.graphics.getDeltaTime();
-            pauseDuration += 0.0f;
+            float pauseEndTime = TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f;
+            pauseDuration += (pauseEndTime - pauseStartTime);
         }
     }
 
@@ -197,14 +198,17 @@ public class DuckAttackOOP extends ApplicationAdapter {
         health = 100;
         applesCollected = 0;
         ducksKilled = 0;
+        for(Duck duck:ducks)
+            duckPool.free(duck);
+        for(Apple apple:apples)
+            applePool.free(apple);
         ducks.clear();
         apples.clear();
-        worm = new Worm(Gdx.graphics.getWidth() / 2f - Assets.wormImg.getWidth() / 2f, 20);
+        worm.bounds.x = Gdx.graphics.getWidth() / 2f - Assets.wormImg.getWidth() / 2f;
+        worm.bounds.y = 20;
         goldenApple = null;
         ducks.add(Duck.spawnDuck());
-        duckPool.fill(1);
         apples.add(Apple.spawnApple());
-        applePool.fill(2);
         gameState = GameState.PLAYING;
     }
 
