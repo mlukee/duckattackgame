@@ -42,8 +42,8 @@ public class DuckAttackOOP extends ApplicationAdapter {
     private final Pool<Apple> applePool = Pools.get(Apple.class, 3);
     public static boolean isBulletFired = false;
 
-    private long pauseStartTime;
-    private long pauseDuration;
+    private float pauseStartTime;
+    private float pauseDuration;
 
     @Override
     public void create() {
@@ -60,21 +60,27 @@ public class DuckAttackOOP extends ApplicationAdapter {
 
     @Override
     public void render() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            togglePauseState();
+            return;
+        }
         switch (gameState) {
             case PLAYING:
+                handleInput();
                 update(Gdx.graphics.getDeltaTime());
-                renderPlaying();
+                if (health <= 0) {
+                    gameState = GameState.GAME_OVER;
+                    Assets.gameOver.play();
+                }
                 break;
             case PAUSED:
-                renderPaused();
                 break;
             case GAME_OVER:
-                batch.begin();
                 handleInput();
-                renderGameOver();
-                batch.end();
                 break;
         }
+        renderGameElements();
+
     }
 
     public void update(float delta) {
@@ -83,11 +89,13 @@ public class DuckAttackOOP extends ApplicationAdapter {
         }
         if (goldenApple != null) {
             goldenApple.update(delta);
-            if (worm.isCollisionWithGoldenApple(goldenApple)) {
-                goldenApple = null;
-            }
             if (goldenApple.isAppleOutOfBounds()) {
                 goldenApple = null;
+            }
+            if (goldenApple != null) {
+                if (worm.isCollisionWithGoldenApple(goldenApple)) {
+                    goldenApple = null;
+                }
             }
         }
 
@@ -103,12 +111,12 @@ public class DuckAttackOOP extends ApplicationAdapter {
             bullet = new Bullet(worm.bounds.x + worm.bounds.width / 2f - Assets.bulletImg.getWidth() / 2f, worm.bounds.y + worm.bounds.height);
         }
 
-        if (isTimeToSpawnNewDuck()) {
+        if (isTimeToSpawnNewDuck(pauseDuration)) {
             Duck duck = duckPool.obtain();
             duck.init(MathUtils.random(0, Gdx.graphics.getWidth() - Assets.duckImg.getWidth()), Gdx.graphics.getHeight());
             ducks.add(Duck.spawnDuck());
         }
-        if (isTimeToSpawnNewApple()) {
+        if (isTimeToSpawnNewApple(pauseDuration)) {
             Apple apple = applePool.obtain();
             apple.init(MathUtils.random(0, Gdx.graphics.getWidth() - Assets.appleImg.getWidth()), Gdx.graphics.getHeight());
             apples.add(Apple.spawnApple());
@@ -156,25 +164,8 @@ public class DuckAttackOOP extends ApplicationAdapter {
         Assets.dispose();
     }
 
-    private void renderPlaying() {
-        handleInput();
-
-        ScreenUtils.clear(0, 0, 0, 1);
-        batch.begin();
-        batch.draw(Assets.bg, 0, -290);
-        if (health <= 0) {
-            gameState = GameState.GAME_OVER;
-            Assets.gameOver.play();
-        } else {
-            renderGameElements();
-        }
-        batch.end();
-    }
 
     private void handleInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-            togglePauseState();
-        }
         if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             handleGameReset();
         }
@@ -184,13 +175,14 @@ public class DuckAttackOOP extends ApplicationAdapter {
     }
 
     private void togglePauseState() {
+        gameState = (gameState == GameState.PLAYING) ? GameState.PAUSED : GameState.PLAYING;
         if (gameState == GameState.PAUSED) {
-            long pauseEndTime = System.currentTimeMillis();
+            float pauseEndTime = Gdx.graphics.getDeltaTime();
             pauseDuration += pauseEndTime - pauseStartTime;
         } else {
-            pauseStartTime = System.currentTimeMillis();
+            pauseStartTime = Gdx.graphics.getDeltaTime();
+            pauseDuration += 0.0f;
         }
-        gameState = (gameState == GameState.PAUSED) ? GameState.PLAYING : GameState.PAUSED;
     }
 
     private void fireBullet() {
@@ -200,12 +192,6 @@ public class DuckAttackOOP extends ApplicationAdapter {
                 worm.bounds.y + worm.bounds.height);
     }
 
-    private void renderPaused() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) gameState = GameState.PLAYING;
-        batch.begin();
-        drawText(batch, Color.RED, "PAUSED", Gdx.graphics.getWidth() / 2f - 60f, Gdx.graphics.getHeight() / 2f);
-        batch.end();
-    }
 
     private void handleGameReset() {
         health = 100;
@@ -228,19 +214,32 @@ public class DuckAttackOOP extends ApplicationAdapter {
     }
 
     private void renderGameElements() {
+        batch.begin();
+        ScreenUtils.clear(0, 0, 0, 1);
+        batch.draw(Assets.bg, 0, -290);
+
         worm.render(batch);
         if (isBulletFired) bullet.render(batch);
         for (Duck duck : ducks) duck.render(batch);
         for (Apple apple : apples) apple.render(batch);
         if (goldenApple != null) goldenApple.render(batch);
         renderHUD();
+        batch.end();
     }
 
     private void renderHUD() {
+        if(gameState == GameState.PAUSED){
+            drawText(batch, Color.RED, "PAUSED", Gdx.graphics.getWidth() / 2f - 60f, Gdx.graphics.getHeight() / 2f);
+            return;
+        }
+        if(gameState == GameState.GAME_OVER){
+            renderGameOver();
+            return;
+        }
         drawText(batch, Color.RED, "Health: " + health, 20f, Gdx.graphics.getHeight() - 20f);
         drawText(batch, Color.SLATE, "Score: " + applesCollected, 20f, Gdx.graphics.getHeight() - 50f);
         drawText(batch, Color.DARK_GRAY, "Ducks killed: " + ducksKilled, 20f, Gdx.graphics.getHeight() - 80f);
-        if(worm.isDoublePointsActive()){
+        if (worm.isDoublePointsActive()) {
             drawText(batch, Color.GOLD, "Double points active", 20f, Gdx.graphics.getHeight() - 110f);
         }
     }

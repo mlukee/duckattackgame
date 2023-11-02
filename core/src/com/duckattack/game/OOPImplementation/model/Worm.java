@@ -18,7 +18,6 @@ public class Worm extends GameObject {
     private float doublePointsDuration;
 
 
-
     public Worm(float x, float y) {
         super(x, y, Assets.wormImg.getWidth(), Assets.wormImg.getHeight());
         health = 100;
@@ -59,6 +58,7 @@ public class Worm extends GameObject {
     public void activateDoublePoints() {
         doublePointsDuration = 10;
     }
+
     public boolean isDoublePointsActive() {
         return doublePointsDuration > 0;
     }
@@ -68,11 +68,6 @@ public class Worm extends GameObject {
             health -= Duck.getDuckDamage();
             if (health > 0) {
                 Assets.wormHit.play();
-                if (isDoublePointsActive()) {
-                    ducksKilled += 2;
-                } else {
-                    ducksKilled++;
-                }
             }
             return true;
         }
@@ -94,8 +89,8 @@ public class Worm extends GameObject {
         return false;
     }
 
-    public boolean isCollisionWithGoldenApple(GoldenApple apple){
-        if(this.bounds.overlaps(apple.bounds)){
+    public boolean isCollisionWithGoldenApple(GoldenApple apple) {
+        if (this.bounds.overlaps(apple.bounds)) {
             Assets.wormEat.play();
             activateDoublePoints();
             return true;

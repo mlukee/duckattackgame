@@ -44,8 +44,8 @@ public class Apple extends GameObject implements Pool.Poolable {
         return apple.bounds.y + apple.bounds.height < 0;
     }
 
-    public static boolean isTimeToSpawnNewApple() {
-        return (TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f) - appleSpawnTime > APPLE_SPAWN_TIME;
+    public static boolean isTimeToSpawnNewApple(float delta) {
+        return (TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f) - appleSpawnTime - delta > APPLE_SPAWN_TIME;
     }
 
     public static Apple spawnApple() {
