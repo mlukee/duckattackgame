@@ -4,17 +4,18 @@ Duck Attack je preprosta arkadna igra za enega igralca, kjer igralec nadzoruje h
 
 ### Dinamika igre
 
-Igralec mora premikati črva levo ali desno, da se izogne napadom rac. Če črv poje jabolko, pridobi dodatne življenjske točke. Igralec ima omejeno število življenjskih točk, ki se zmanjšujejo, ko ga raca zadane. Igra se konča, ko igralec izgubi vse življenjske točke.
+Igralec mora premikati črva levo ali desno, da se izogne napadom rac. Če črv poje jabolko, pridobi dodatne življenjske točke, če poje zlato jabolko, dobiva dva kratne točke za določeno število sekind. Igralec ima omejeno število življenjskih točk, ki se zmanjšujejo, ko ga raca zadane. Igra se konča, ko igralec izgubi vse življenjske točke.
 
 ### Mehanika igre
 
-Vodenje črva, napad race, jesti jabolka, izmikanje, začetek igre, konec igre
+Vodenje črva, napad race, jesti jabolka, jesti zlata jabolka, izmikanje racam, začetek igre, konec igre
 
 ### Elementi igre
 
 - **Črv (worm):** Glavni lik, ki ga igralec nadzoruje.
 - **Race (duck):** Sovražniki v igri, ki napadajo črva.
 - **Jabolko (apple):** Hrana, ki črvu povrne življenjske točke.
+- **Zlato jabolko (Golden apple):** 'Powerup', kadar črv poje zlato jabolko, dobi dvojne točke za določeno število sekund.
 - **Življenjske točke (HP):** Merilo za zdravje črva. Zmanjšujejo se ob stiku z racami.
 - **Zvoki:** Sprožijo se ob zaužitju jabolka, stiku z raco in ob koncu igre.
 - **Naravno okolje:** Ozadje igre, ki prikazuje naravno okolje, kjer se dogajajo dogodki igre.
