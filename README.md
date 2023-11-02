@@ -15,7 +15,7 @@ Vodenje črva, napad race, jesti jabolka, jesti zlata jabolka, izmikanje racam, 
 - **Črv (worm):** Glavni lik, ki ga igralec nadzoruje.
 - **Race (duck):** Sovražniki v igri, ki napadajo črva.
 - **Jabolko (apple):** Hrana, ki črvu povrne življenjske točke.
-- **Zlato jabolko (Golden apple): ** 'Powerup', kadar črv poje zlato jabolko, dobi dvojne točke za določeno število sekund.
+- **Zlato jabolko (Golden apple):** 'Powerup', kadar črv poje zlato jabolko, dobi dvojne točke za določeno število sekund.
 - **Življenjske točke (HP):** Merilo za zdravje črva. Zmanjšujejo se ob stiku z racami.
 - **Zvoki:** Sprožijo se ob zaužitju jabolka, stiku z raco in ob koncu igre.
 - **Naravno okolje:** Ozadje igre, ki prikazuje naravno okolje, kjer se dogajajo dogodki igre.
