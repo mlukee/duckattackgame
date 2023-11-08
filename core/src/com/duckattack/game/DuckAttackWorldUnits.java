@@ -22,6 +22,8 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.duckattack.game.debug.DebugCameraController;
+import com.duckattack.game.debug.MemoryInfo;
+import com.duckattack.game.util.ViewPortUtils;
 
 import java.util.Iterator;
 
@@ -30,13 +32,15 @@ import sun.security.x509.OtherName;
 public class DuckAttackWorldUnits extends ApplicationAdapter {
 
     //world units
-    private static final float WORLD_WIDTH = 400f;
+    private static final float WORLD_WIDTH = 600f;
     private static final float WORLD_HEIGHT = 500f;
     private DebugCameraController debugCameraController;
+    private MemoryInfo memoryInfo;
     private boolean debug = false;
 
     private OrthographicCamera camera;
     private Viewport viewport;
+    private Viewport hudViewport;
     private ShapeRenderer renderer;
     private SpriteBatch batch;
     private Texture wormImg;
@@ -80,10 +84,13 @@ public class DuckAttackWorldUnits extends ApplicationAdapter {
     public void create() {
         camera = new OrthographicCamera();
         viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
+        hudViewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         renderer = new ShapeRenderer();
 
         debugCameraController = new DebugCameraController();
         debugCameraController.setStartPosition(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f);
+
+        memoryInfo = new MemoryInfo(500);
 
         batch = new SpriteBatch();
 
@@ -125,6 +132,8 @@ public class DuckAttackWorldUnits extends ApplicationAdapter {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
+        hudViewport.update(width, height, true);
+        ViewPortUtils.debugPixelsPerUnit(viewport);
     }
 
     @Override
@@ -134,14 +143,70 @@ public class DuckAttackWorldUnits extends ApplicationAdapter {
             handleInput();
             update(Gdx.graphics.getDeltaTime());
         }
+        if (debug) {
+            debugCameraController.handleDebugInput(Gdx.graphics.getDeltaTime());
+            debugCameraController.applyTo(camera);
+        }
 
         viewport.apply();
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-
         draw();
-
         batch.end();
+
+        hudViewport.apply();
+        batch.setProjectionMatrix(hudViewport.getCamera().combined);
+        batch.begin();
+        drawHud();
+        batch.end();
+        if (debug) renderDebug();
+    }
+
+    private void drawHud() {
+
+        font.setColor(Color.RED);
+        font.draw(batch, "HEALTH: " + health, 20f, hudViewport.getWorldHeight() - 20f);
+        font.draw(batch, "HEALTH: " + health, 20f - 1, hudViewport.getWorldHeight() - 20f);
+
+        font.setColor(Color.SLATE);
+        font.draw(batch,
+                "SCORE: " + applesCollected,
+                20f, hudViewport.getWorldHeight() - 50f
+        );
+
+        font.setColor(Color.DARK_GRAY);
+        font.draw(batch,
+                "DUCKS KILLED: " + ducksKilled,
+                20f, hudViewport.getWorldHeight() - 80f
+        );
+        if(debug) memoryInfo.render(batch, font);
+    }
+
+    private void renderDebug() {
+        ViewPortUtils.drawGrid(viewport, renderer, 30);
+
+        viewport.apply();
+
+        Color oldColor = new Color(renderer.getColor());
+        renderer.setProjectionMatrix(camera.combined);
+        renderer.begin(ShapeRenderer.ShapeType.Line);
+
+        drawDebug();
+
+        renderer.end();
+        renderer.setColor(oldColor);
+    }
+
+    private void drawDebug() {
+        renderer.setColor(Color.WHITE);
+        renderer.rect(worm.x, worm.y, worm.width, worm.height);
+        if (isBulletFired) renderer.rect(bullet.x, bullet.y, bullet.width, bullet.height);
+        for (Rectangle duck : ducks) {
+            renderer.rect(duck.x, duck.y, duck.width, duck.height);
+        }
+        for (Rectangle apple : apples) {
+            renderer.rect(apple.x, apple.y, apple.width, apple.height);
+        }
     }
 
     private void spawnBullet() {
@@ -155,8 +220,9 @@ public class DuckAttackWorldUnits extends ApplicationAdapter {
     }
 
     private void handleInput() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.O)) debug = !debug;
         boolean isLeftPressed = Gdx.input.isKeyPressed(Input.Keys.LEFT) || (Gdx.input.isTouched() && Gdx.input.getX() < WORLD_WIDTH / 2);
-        boolean isRightPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT) || (Gdx.input.isTouched() && Gdx.input.getX() >=WORLD_WIDTH / 2);
+        boolean isRightPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT) || (Gdx.input.isTouched() && Gdx.input.getX() >= WORLD_WIDTH / 2);
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !isBulletFired) spawnBullet();
 
         // Determine the movement direction
@@ -176,6 +242,7 @@ public class DuckAttackWorldUnits extends ApplicationAdapter {
     }
 
     private void update(float delta) {
+        memoryInfo.update();
         float elapsedTime = TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f;
         if (elapsedTime - duckSpawnTime > DUCK_SPAWN_TIME) spawnDuck();
         if (elapsedTime - appleSpawnTime > APPLE_SPAWN_TIME) spawnApple();
@@ -236,12 +303,13 @@ public class DuckAttackWorldUnits extends ApplicationAdapter {
             return;
         }
         if (gameOverSoundPlayed) {
+            hudViewport.apply();
             font.setColor(Color.RED);
             String gameOverString = "GAME OVER";
             GlyphLayout layout = new GlyphLayout(font, gameOverString);
 
-            float x = (WORLD_WIDTH - layout.width) / 2f;
-            float y = (WORLD_HEIGHT + layout.height) / 2f;
+            float x = (viewport.getWorldWidth() - layout.width) / 2f;
+            float y = (viewport.getWorldHeight() + layout.height) / 2f;
 
             font.draw(batch, layout, x, y);
             return;
@@ -260,22 +328,6 @@ public class DuckAttackWorldUnits extends ApplicationAdapter {
         if (isBulletFired) batch.draw(bulletImg, bullet.x, bullet.y);
 
         batch.draw(wormSprite, worm.x, worm.y);
-
-        font.setColor(Color.RED);
-        font.draw(batch, "HEALTH: " + health, 20f, WORLD_HEIGHT - 20f);
-        font.draw(batch, "HEALTH: " + health, 20f - 1, WORLD_HEIGHT - 20f);
-
-        font.setColor(Color.SLATE);
-        font.draw(batch,
-                "SCORE: " + applesCollected,
-                20f, WORLD_HEIGHT - 50f
-        );
-
-        font.setColor(Color.DARK_GRAY);
-        font.draw(batch,
-                "DUCKS KILLED: " + ducksKilled,
-                20f, WORLD_HEIGHT - 80f
-        );
     }
 
     private void moveLeft(float delta) {
