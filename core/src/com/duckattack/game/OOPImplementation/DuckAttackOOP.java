@@ -198,10 +198,8 @@ public class DuckAttackOOP extends ApplicationAdapter {
         health = 100;
         applesCollected = 0;
         ducksKilled = 0;
-        for(Duck duck:ducks)
-            duckPool.free(duck);
-        for(Apple apple:apples)
-            applePool.free(apple);
+        duckPool.freeAll(ducks);
+        applePool.freeAll(apples);
         ducks.clear();
         apples.clear();
         worm.bounds.x = Gdx.graphics.getWidth() / 2f - Assets.wormImg.getWidth() / 2f;
