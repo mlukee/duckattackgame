@@ -1,5 +1,8 @@
 package com.duckattack.game.OOPImplementation.model;
 
+import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_HEIGHT;
+import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_WIDTH;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -17,8 +20,9 @@ public class Apple extends GameObject implements Pool.Poolable {
     public Apple(float x, float y) {
         super(x, y, Assets.appleImg.getWidth(), Assets.appleImg.getHeight());
     }
-    public Apple(){
-        super(MathUtils.random(0, Gdx.graphics.getWidth() - Assets.appleImg.getWidth()),Gdx.graphics.getHeight(),Assets.appleImg.getWidth(),Assets.appleImg.getHeight());
+
+    public Apple() {
+        super(MathUtils.random(0, WORLD_WIDTH - Assets.appleImg.getWidth()), WORLD_HEIGHT, Assets.appleImg.getWidth(), Assets.appleImg.getHeight());
     }
 
     public void init(float posX, float posY) {
@@ -51,15 +55,15 @@ public class Apple extends GameObject implements Pool.Poolable {
     }
 
     public static Apple spawnApple() {
-        float x = MathUtils.random(0, Gdx.graphics.getWidth() - Assets.appleImg.getWidth());
-        float y = Gdx.graphics.getHeight();
+        float x = MathUtils.random(0, WORLD_WIDTH - Assets.appleImg.getWidth());
+        float y = WORLD_HEIGHT;
         appleSpawnTime = TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f;
         return new Apple(x, y);
     }
 
     @Override
     public void reset() {
-        this.bounds.x = MathUtils.random(0, Gdx.graphics.getWidth() - Assets.appleImg.getWidth());
-        this.bounds.y = Gdx.graphics.getHeight();
+        this.bounds.x = MathUtils.random(0, WORLD_WIDTH - Assets.appleImg.getWidth());
+        this.bounds.y = WORLD_HEIGHT;
     }
 }

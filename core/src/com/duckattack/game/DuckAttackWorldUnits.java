@@ -33,7 +33,7 @@ public class DuckAttackWorldUnits extends ApplicationAdapter {
 
     //world units
     private static final float WORLD_WIDTH = 600f;
-    private static final float WORLD_HEIGHT = 500f;
+    private static final float WORLD_HEIGHT = 600f;
     private DebugCameraController debugCameraController;
     private MemoryInfo memoryInfo;
     private boolean debug = false;

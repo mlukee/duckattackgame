@@ -38,7 +38,7 @@ public class MemoryInfo {
 
     public void render(SpriteBatch batch, BitmapFont font) {
         float positionY = 100 + font.getCapHeight();
-        font.setColor(Color.WHITE);
+        font.setColor(Color.BLACK);
         font.draw(batch, "totalMemory:" + totalMemory + " mb", 20, positionY);
         positionY += font.getCapHeight() + 10;
         font.draw(batch, "freeMemory :" + freeMemory + " mb", 20, positionY);

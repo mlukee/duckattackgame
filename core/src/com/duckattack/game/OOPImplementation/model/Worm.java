@@ -1,6 +1,8 @@
 package com.duckattack.game.OOPImplementation.model;
 
 
+import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_WIDTH;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -29,8 +31,8 @@ public class Worm extends GameObject {
 
     @Override
     public void update(float delta) {
-        boolean isLeftPressed = Gdx.input.isKeyPressed(Input.Keys.LEFT) || (Gdx.input.isTouched() && Gdx.input.getX() < Gdx.graphics.getWidth() / 2);
-        boolean isRightPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT) || (Gdx.input.isTouched() && Gdx.input.getX() >= Gdx.graphics.getWidth() / 2);
+        boolean isLeftPressed = Gdx.input.isKeyPressed(Input.Keys.LEFT) || (Gdx.input.isTouched() && Gdx.input.getX() < WORLD_WIDTH / 2);
+        boolean isRightPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT) || (Gdx.input.isTouched() && Gdx.input.getX() >= WORLD_WIDTH / 2);
 
         // Determine the movement direction
         if (isLeftPressed) {
@@ -111,7 +113,7 @@ public class Worm extends GameObject {
 
     public void moveRight(float delta) {
         super.bounds.x += WORM_SPEED * delta;
-        if (super.bounds.x > Gdx.graphics.getWidth() - super.bounds.width)
-            super.bounds.x = Gdx.graphics.getWidth() - super.bounds.width;
+        if (super.bounds.x > WORLD_WIDTH - super.bounds.width)
+            super.bounds.x = WORLD_WIDTH - super.bounds.width;
     }
 }

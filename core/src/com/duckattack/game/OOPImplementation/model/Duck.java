@@ -1,5 +1,8 @@
 package com.duckattack.game.OOPImplementation.model;
 
+import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_HEIGHT;
+import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_WIDTH;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -18,7 +21,7 @@ public class Duck extends GameObject implements Pool.Poolable {
     }
 
     public Duck(){
-        super(MathUtils.random(0, Gdx.graphics.getWidth() - Assets.duckImg.getWidth()),Gdx.graphics.getHeight(),Assets.duckImg.getWidth(),Assets.duckImg.getHeight());
+        super(MathUtils.random(0, WORLD_WIDTH - Assets.duckImg.getWidth()),WORLD_HEIGHT,Assets.duckImg.getWidth(),Assets.duckImg.getHeight());
     }
 
     public void init(float posX, float posY) {
@@ -56,15 +59,15 @@ public class Duck extends GameObject implements Pool.Poolable {
     }
 
     public static Duck spawnDuck() {
-        float x = MathUtils.random(0, Gdx.graphics.getWidth() - Assets.duckImg.getWidth());
-        float y = Gdx.graphics.getHeight();
+        float x = MathUtils.random(0, WORLD_WIDTH - Assets.duckImg.getWidth());
+        float y = WORLD_HEIGHT;
         duckSpawnTime = TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f;
         return new Duck(x, y);
     }
 
     @Override
     public void reset() {
-        this.bounds.x = MathUtils.random(0, Gdx.graphics.getWidth() - Assets.duckImg.getWidth());
-        this.bounds.y = Gdx.graphics.getHeight();
+        this.bounds.x = MathUtils.random(0, WORLD_WIDTH - Assets.duckImg.getWidth());
+        this.bounds.y = WORLD_HEIGHT;
     }
 }

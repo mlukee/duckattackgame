@@ -2,6 +2,8 @@ package com.duckattack.game.OOPImplementation;
 
 import static com.duckattack.game.OOPImplementation.model.Apple.isAppleOutOfBounds;
 import static com.duckattack.game.OOPImplementation.model.Apple.isTimeToSpawnNewApple;
+import static com.duckattack.game.OOPImplementation.model.Assets.bg;
+import static com.duckattack.game.OOPImplementation.model.Assets.drawMemoryInfo;
 import static com.duckattack.game.OOPImplementation.model.Assets.drawText;
 import static com.duckattack.game.OOPImplementation.model.Duck.isDuckHitByBullet;
 import static com.duckattack.game.OOPImplementation.model.Duck.isDuckOutOfBounds;
@@ -12,13 +14,17 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.duckattack.game.OOPImplementation.model.Apple;
 import com.duckattack.game.OOPImplementation.model.Assets;
 import com.duckattack.game.OOPImplementation.model.Bullet;
@@ -26,8 +32,21 @@ import com.duckattack.game.OOPImplementation.model.Duck;
 import com.duckattack.game.OOPImplementation.model.GameState;
 import com.duckattack.game.OOPImplementation.model.GoldenApple;
 import com.duckattack.game.OOPImplementation.model.Worm;
+import com.duckattack.game.debug.DebugCameraController;
+import com.duckattack.game.debug.MemoryInfo;
+import com.duckattack.game.util.ViewPortUtils;
 
 public class DuckAttackOOP extends ApplicationAdapter {
+    public static final float WORLD_WIDTH = 500f;
+    public static final float WORLD_HEIGHT = 500f;
+    private DebugCameraController debugCameraController;
+    private MemoryInfo memoryInfo;
+    private boolean debug = false;
+    private OrthographicCamera camera;
+    private Viewport viewport;
+    private Viewport hudViewport;
+    private ShapeRenderer renderer;
+
     public SpriteBatch batch;
     public GameState gameState = GameState.PLAYING;
     public Worm worm;
@@ -43,15 +62,24 @@ public class DuckAttackOOP extends ApplicationAdapter {
     public static boolean isBulletFired = false;
 
     private float pauseStartTime;
-    private float pauseDuration=0;
+    private float pauseDuration = 0;
 
     @Override
     public void create() {
+        camera = new OrthographicCamera();
+        viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
+        hudViewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        renderer = new ShapeRenderer();
+
+        debugCameraController = new DebugCameraController();
+        debugCameraController.setStartPosition(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f);
+
+        memoryInfo = new MemoryInfo(500);
         batch = new SpriteBatch();
         ducks = new Array<>();
         apples = new Array<>();
         Assets.load();
-        worm = new Worm(Gdx.graphics.getWidth() / 2f - Assets.wormImg.getWidth() / 2f, 20);
+        worm = new Worm(WORLD_WIDTH / 2f - Assets.wormImg.getWidth() / 2f, 20);
         ducks.add(Duck.spawnDuck());
         duckPool.fill(2);
         apples.add(Apple.spawnApple());
@@ -59,7 +87,15 @@ public class DuckAttackOOP extends ApplicationAdapter {
     }
 
     @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height, true);
+        hudViewport.update(width, height, true);
+        ViewPortUtils.debugPixelsPerUnit(viewport);
+    }
+
+    @Override
     public void render() {
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
             togglePauseState();
             return;
@@ -79,11 +115,49 @@ public class DuckAttackOOP extends ApplicationAdapter {
                 handleInput();
                 break;
         }
+        viewport.apply();
         renderGameElements();
 
     }
 
+    private void renderDebug() {
+        ViewPortUtils.drawGrid(viewport, renderer, 30);
+
+        viewport.apply();
+
+        Color oldColor = new Color(renderer.getColor());
+        renderer.setProjectionMatrix(camera.combined);
+        renderer.begin(ShapeRenderer.ShapeType.Line);
+
+        drawDebug();
+
+        renderer.end();
+        renderer.setColor(oldColor);
+    }
+
+    private void drawDebug() {
+        renderer.setColor(Color.WHITE);
+        renderer.rect(worm.bounds.x, worm.bounds.y, worm.bounds.width, worm.bounds.height);
+        renderer.setColor(Color.RED);
+        for (Duck duck : ducks) {
+            renderer.rect(duck.bounds.x, duck.bounds.y, duck.bounds.width, duck.bounds.height);
+        }
+        renderer.setColor(Color.GREEN);
+        for (Apple apple : apples) {
+            renderer.rect(apple.bounds.x, apple.bounds.y, apple.bounds.width, apple.bounds.height);
+        }
+        if (goldenApple != null) {
+            renderer.setColor(Color.GOLD);
+            renderer.rect(goldenApple.bounds.x, goldenApple.bounds.y, goldenApple.bounds.width, goldenApple.bounds.height);
+        }
+        if (isBulletFired) {
+            renderer.setColor(Color.YELLOW);
+            renderer.rect(bullet.bounds.x, bullet.bounds.y, bullet.bounds.width, bullet.bounds.height);
+        }
+    }
+
     public void update(float delta) {
+        memoryInfo.update();
         if (GoldenApple.isTimeToSpawnNewApple()) {
             goldenApple = GoldenApple.spawnApple();
         }
@@ -102,7 +176,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
         worm.update(delta);
         if (isBulletFired) {
             bullet.update(delta);
-            if (bullet.bounds.y > Gdx.graphics.getHeight()) isBulletFired = false;
+            if (bullet.bounds.y > WORLD_HEIGHT) isBulletFired = false;
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !isBulletFired) {
@@ -113,12 +187,12 @@ public class DuckAttackOOP extends ApplicationAdapter {
 
         if (isTimeToSpawnNewDuck(pauseDuration)) {
             Duck duck = duckPool.obtain();
-            duck.init(MathUtils.random(0, Gdx.graphics.getWidth() - Assets.duckImg.getWidth()), Gdx.graphics.getHeight());
+            duck.init(MathUtils.random(0, WORLD_WIDTH - Assets.duckImg.getWidth()), WORLD_HEIGHT);
             ducks.add(Duck.spawnDuck());
         }
         if (isTimeToSpawnNewApple(pauseDuration)) {
             Apple apple = applePool.obtain();
-            apple.init(MathUtils.random(0, Gdx.graphics.getWidth() - Assets.appleImg.getWidth()), Gdx.graphics.getHeight());
+            apple.init(MathUtils.random(0, WORLD_WIDTH - Assets.appleImg.getWidth()), WORLD_HEIGHT);
             apples.add(Apple.spawnApple());
         }
 
@@ -166,6 +240,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
 
 
     private void handleInput() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.O)) debug = !debug;
         if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             handleGameReset();
         }
@@ -202,7 +277,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
         applePool.freeAll(apples);
         ducks.clear();
         apples.clear();
-        worm.bounds.x = Gdx.graphics.getWidth() / 2f - Assets.wormImg.getWidth() / 2f;
+        worm.bounds.x = WORLD_WIDTH / 2f - Assets.wormImg.getWidth() / 2f;
         worm.bounds.y = 20;
         goldenApple = null;
         ducks.add(Duck.spawnDuck());
@@ -211,38 +286,52 @@ public class DuckAttackOOP extends ApplicationAdapter {
     }
 
     private void renderGameOver() {
-        drawText(batch, Color.RED, "GAME OVER", Gdx.graphics.getWidth() / 2f - 60f, Gdx.graphics.getHeight() / 2f);
-        drawText(batch, Color.RED, "Press R to restart", Gdx.graphics.getWidth() / 2f - 60f, Gdx.graphics.getHeight() / 2f - 30f);
+        drawText(batch, Color.RED, "GAME OVER", WORLD_WIDTH / 2f - 60f, WORLD_HEIGHT / 2f);
+        drawText(batch, Color.RED, "Press R to restart", WORLD_WIDTH / 2f - 60f, WORLD_HEIGHT / 2f - 30f);
     }
 
     private void renderGameElements() {
+        if (debug) {
+            debugCameraController.handleDebugInput(Gdx.graphics.getDeltaTime());
+            debugCameraController.applyTo(camera);
+        }
+        batch.setProjectionMatrix(camera.combined);
         batch.begin();
         ScreenUtils.clear(0, 0, 0, 1);
-        batch.draw(Assets.bg, 0, -290);
+        batch.draw(Assets.bg, WORLD_WIDTH / 2f - bg.getWidth() / 2f -50f, WORLD_HEIGHT - bg.getHeight() / 2f - 290f);
 
         worm.render(batch);
         if (isBulletFired) bullet.render(batch);
         for (Duck duck : ducks) duck.render(batch);
         for (Apple apple : apples) apple.render(batch);
         if (goldenApple != null) goldenApple.render(batch);
+        batch.end();
+        hudViewport.apply();
+        batch.setProjectionMatrix(hudViewport.getCamera().combined);
+        batch.begin();
         renderHUD();
         batch.end();
+
+        if (debug) renderDebug();
+
     }
 
     private void renderHUD() {
-        if(gameState == GameState.PAUSED){
-            drawText(batch, Color.RED, "PAUSED", Gdx.graphics.getWidth() / 2f - 60f, Gdx.graphics.getHeight() / 2f);
+
+        if (gameState == GameState.PAUSED) {
+            drawText(batch, Color.RED, "PAUSED", WORLD_WIDTH / 2f - 60f, WORLD_HEIGHT / 2f);
             return;
         }
-        if(gameState == GameState.GAME_OVER){
+        if (gameState == GameState.GAME_OVER) {
             renderGameOver();
             return;
         }
-        drawText(batch, Color.RED, "Health: " + health, 20f, Gdx.graphics.getHeight() - 20f);
-        drawText(batch, Color.SLATE, "Score: " + applesCollected, 20f, Gdx.graphics.getHeight() - 50f);
-        drawText(batch, Color.DARK_GRAY, "Ducks killed: " + ducksKilled, 20f, Gdx.graphics.getHeight() - 80f);
+        drawText(batch, Color.RED, "Health: " + health, 20f, hudViewport.getWorldHeight() - 20f);
+        drawText(batch, Color.SLATE, "Score: " + applesCollected, 20f, hudViewport.getWorldHeight() - 50f);
+        drawText(batch, Color.DARK_GRAY, "Ducks killed: " + ducksKilled, 20f, hudViewport.getWorldHeight() - 80f);
         if (worm.isDoublePointsActive()) {
-            drawText(batch, Color.GOLD, "Double points active", 20f, Gdx.graphics.getHeight() - 110f);
+            drawText(batch, Color.GOLD, "Double points active", 20f, hudViewport.getWorldHeight() - 110f);
         }
+        if (debug) drawMemoryInfo(memoryInfo, batch);
     }
 }

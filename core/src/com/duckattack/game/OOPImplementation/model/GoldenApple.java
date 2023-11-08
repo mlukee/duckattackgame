@@ -1,5 +1,8 @@
 package com.duckattack.game.OOPImplementation.model;
 
+import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_HEIGHT;
+import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_WIDTH;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -37,8 +40,8 @@ public class GoldenApple extends GameObject{
     }
 
     public static GoldenApple spawnApple() {
-        float x = MathUtils.random(0, Gdx.graphics.getWidth() - Assets.appleImg.getWidth());
-        float y = Gdx.graphics.getHeight();
+        float x = MathUtils.random(0, WORLD_WIDTH - Assets.appleImg.getWidth());
+        float y = WORLD_HEIGHT;
         appleSpawnTime = TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f;
         return new GoldenApple(x, y);
     }
