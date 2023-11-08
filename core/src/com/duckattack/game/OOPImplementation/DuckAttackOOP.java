@@ -37,8 +37,8 @@ import com.duckattack.game.debug.MemoryInfo;
 import com.duckattack.game.util.ViewPortUtils;
 
 public class DuckAttackOOP extends ApplicationAdapter {
-    public static final float WORLD_WIDTH = 500f;
-    public static final float WORLD_HEIGHT = 500f;
+    public static final float WORLD_WIDTH = 650f;
+    public static final float WORLD_HEIGHT = 650f;
     private DebugCameraController debugCameraController;
     private MemoryInfo memoryInfo;
     private boolean debug = false;
@@ -277,7 +277,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
         applePool.freeAll(apples);
         ducks.clear();
         apples.clear();
-        worm.bounds.x = WORLD_WIDTH / 2f - Assets.wormImg.getWidth() / 2f;
+        worm.bounds.x = viewport.getWorldWidth() / 2f - Assets.wormImg.getWidth() / 2f;
         worm.bounds.y = 20;
         goldenApple = null;
         ducks.add(Duck.spawnDuck());
@@ -286,8 +286,8 @@ public class DuckAttackOOP extends ApplicationAdapter {
     }
 
     private void renderGameOver() {
-        drawText(batch, Color.RED, "GAME OVER", WORLD_WIDTH / 2f - 60f, WORLD_HEIGHT / 2f);
-        drawText(batch, Color.RED, "Press R to restart", WORLD_WIDTH / 2f - 60f, WORLD_HEIGHT / 2f - 30f);
+        drawText(batch, Color.RED, "GAME OVER", hudViewport.getWorldWidth() / 2f - 60f, hudViewport.getWorldHeight() / 2f);
+        drawText(batch, Color.RED, "Press R to restart", hudViewport.getWorldWidth() / 2f - 60f, hudViewport.getWorldHeight() / 2f - 30f);
     }
 
     private void renderGameElements() {
@@ -298,7 +298,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         ScreenUtils.clear(0, 0, 0, 1);
-        batch.draw(Assets.bg, WORLD_WIDTH / 2f - bg.getWidth() / 2f -50f, WORLD_HEIGHT - bg.getHeight() / 2f - 290f);
+        batch.draw(Assets.bg, WORLD_WIDTH / 2f - bg.getWidth() / 2f - 50f, (float) (WORLD_HEIGHT - bg.getHeight() / 2f - bg.getHeight() * 0.44));
 
         worm.render(batch);
         if (isBulletFired) bullet.render(batch);
@@ -317,6 +317,15 @@ public class DuckAttackOOP extends ApplicationAdapter {
     }
 
     private void renderHUD() {
+        int screenWidth = Gdx.graphics.getWidth();
+        int screenHeight = Gdx.graphics.getHeight();
+        float worldWidth = viewport.getWorldWidth();
+        float worldHeight = viewport.getWorldHeight();
+
+        String screenSize = "Screen/Window size: " + screenWidth + " x " + screenHeight + " px";
+        String worldSize = "World size: " + (int) worldWidth + " x " + (int) worldHeight + " world units";
+        String oneWorldUnit = "One world unit: " + (screenWidth / worldWidth) + " x " + (screenHeight / worldHeight) + " px";
+        String debugCameraMessage = debug ? "Debug Camera: ON" : "Debug Camera: OFF";
 
         if (gameState == GameState.PAUSED) {
             drawText(batch, Color.RED, "PAUSED", WORLD_WIDTH / 2f - 60f, WORLD_HEIGHT / 2f);
@@ -332,6 +341,11 @@ public class DuckAttackOOP extends ApplicationAdapter {
         if (worm.isDoublePointsActive()) {
             drawText(batch, Color.GOLD, "Double points active", 20f, hudViewport.getWorldHeight() - 110f);
         }
+        drawText(batch, Color.BLACK, screenSize, 20f, hudViewport.getWorldHeight() - 140f);
+        drawText(batch, Color.BLACK, worldSize, 20f, hudViewport.getWorldHeight() - 170f);
+        drawText(batch, Color.BLACK, oneWorldUnit, 20f, hudViewport.getWorldHeight() - 200f);
+        drawText(batch, Color.BLACK, debugCameraMessage, 20f, hudViewport.getWorldHeight() - 230f);
+
         if (debug) drawMemoryInfo(memoryInfo, batch);
     }
 }
