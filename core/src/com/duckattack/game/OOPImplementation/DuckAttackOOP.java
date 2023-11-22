@@ -15,6 +15,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
@@ -76,6 +77,8 @@ public class DuckAttackOOP extends ApplicationAdapter {
     private ParticleEffect peApple;
     private ParticleEffect peBullet;
 
+    private Sound shootSound;
+
     @Override
     public void create() {
         camera = new OrthographicCamera();
@@ -88,9 +91,12 @@ public class DuckAttackOOP extends ApplicationAdapter {
 
         assetManager = new AssetManager();
         assetManager.load(AssetDescriptors.GAMEPLAY);
+        assetManager.load(AssetDescriptors.SHOOT);
         assetManager.finishLoading();
 
         gameplayAtlas = assetManager.get(AssetDescriptors.GAMEPLAY);
+
+        shootSound = assetManager.get(AssetDescriptors.SHOOT);
 
         memoryInfo = new MemoryInfo(500);
         batch = new SpriteBatch();
@@ -213,7 +219,8 @@ public class DuckAttackOOP extends ApplicationAdapter {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !isBulletFired) {
             isBulletFired = true;
-            Assets.bulletSound.play();
+            shootSound.play();
+//            Assets.bulletSound.play();
             bullet = new Bullet(worm.bounds.x + worm.bounds.width / 2f - Assets.bulletImg.getWidth() / 2f, worm.bounds.y + worm.bounds.height);
         }
 
