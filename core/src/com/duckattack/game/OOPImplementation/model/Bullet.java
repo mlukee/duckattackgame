@@ -1,12 +1,17 @@
 package com.duckattack.game.OOPImplementation.model;
 
+import static com.duckattack.game.OOPImplementation.DuckAttackOOP.gameplayAtlas;
+
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.duckattack.game.OOPImplementation.assets.RegionNames;
+
+import javax.swing.plaf.synth.Region;
 
 public class Bullet extends GameObject{
     private static final float BULLET_SPEED = 350;
 
     public Bullet(float x, float y) {
-        super(x, y, Assets.bulletImg.getWidth(), Assets.bulletImg.getHeight());
+        super(x, y, gameplayAtlas.findRegion(RegionNames.BULLET).getRegionWidth(), gameplayAtlas.findRegion(RegionNames.BULLET).getRegionHeight());
     }
 
     @Override
@@ -16,7 +21,7 @@ public class Bullet extends GameObject{
 
     @Override
     public void render(SpriteBatch batch) {
-        batch.draw(Assets.bulletImg, this.bounds.x, this.bounds.y);
+        batch.draw(gameplayAtlas.findRegion(RegionNames.BULLET), this.bounds.x, this.bounds.y);
     }
 
 

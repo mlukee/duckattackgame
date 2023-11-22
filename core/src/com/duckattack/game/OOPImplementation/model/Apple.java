@@ -2,12 +2,14 @@ package com.duckattack.game.OOPImplementation.model;
 
 import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_HEIGHT;
 import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_WIDTH;
+import static com.duckattack.game.OOPImplementation.DuckAttackOOP.gameplayAtlas;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.duckattack.game.OOPImplementation.assets.RegionNames;
 
 public class Apple extends GameObject implements Pool.Poolable {
     private static final float APPLE_SPEED = 150;
@@ -18,11 +20,11 @@ public class Apple extends GameObject implements Pool.Poolable {
 
 
     public Apple(float x, float y) {
-        super(x, y, Assets.appleImg.getWidth(), Assets.appleImg.getHeight());
+        super(x, y, gameplayAtlas.findRegion(RegionNames.APPLE).getRegionWidth(), gameplayAtlas.findRegion(RegionNames.APPLE).getRegionHeight());
     }
 
     public Apple() {
-        super(MathUtils.random(0, WORLD_WIDTH - Assets.appleImg.getWidth()), WORLD_HEIGHT, Assets.appleImg.getWidth(), Assets.appleImg.getHeight());
+        super(MathUtils.random(0, WORLD_WIDTH - gameplayAtlas.findRegion(RegionNames.APPLE).getRegionWidth()), WORLD_HEIGHT, gameplayAtlas.findRegion(RegionNames.APPLE).getRegionWidth(), gameplayAtlas.findRegion(RegionNames.APPLE).getRegionHeight());
     }
 
     public void init(float posX, float posY) {
@@ -37,7 +39,7 @@ public class Apple extends GameObject implements Pool.Poolable {
 
     @Override
     public void render(SpriteBatch batch) {
-        batch.draw(Assets.appleImg, this.bounds.x, this.bounds.y);
+        batch.draw(gameplayAtlas.findRegion(RegionNames.APPLE), this.bounds.x, this.bounds.y);
     }
 
     public static float getAppleHealthRegen() {
@@ -55,7 +57,7 @@ public class Apple extends GameObject implements Pool.Poolable {
     }
 
     public static Apple spawnApple() {
-        float x = MathUtils.random(0, WORLD_WIDTH - Assets.appleImg.getWidth());
+        float x = MathUtils.random(0, WORLD_WIDTH - gameplayAtlas.findRegion(RegionNames.APPLE).getRegionWidth());
         float y = WORLD_HEIGHT;
         appleSpawnTime = TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f;
         return new Apple(x, y);
@@ -63,7 +65,7 @@ public class Apple extends GameObject implements Pool.Poolable {
 
     @Override
     public void reset() {
-        this.bounds.x = MathUtils.random(0, WORLD_WIDTH - Assets.appleImg.getWidth());
+        this.bounds.x = MathUtils.random(0, WORLD_WIDTH - gameplayAtlas.findRegion(RegionNames.APPLE).getRegionWidth());
         this.bounds.y = WORLD_HEIGHT;
     }
 }

@@ -10,13 +10,16 @@ import static com.duckattack.game.OOPImplementation.model.Duck.isDuckOutOfBounds
 import static com.duckattack.game.OOPImplementation.model.Duck.isTimeToSpawnNewDuck;
 import static com.duckattack.game.OOPImplementation.model.Worm.*;
 
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
@@ -26,6 +29,8 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.duckattack.game.OOPImplementation.assets.AssetDescriptors;
+import com.duckattack.game.OOPImplementation.assets.RegionNames;
 import com.duckattack.game.OOPImplementation.model.Apple;
 import com.duckattack.game.OOPImplementation.model.Assets;
 import com.duckattack.game.OOPImplementation.model.Bullet;
@@ -38,14 +43,17 @@ import com.duckattack.game.debug.MemoryInfo;
 import com.duckattack.game.util.ViewPortUtils;
 
 public class DuckAttackOOP extends ApplicationAdapter {
-    public static final float WORLD_WIDTH = 650f;
-    public static final float WORLD_HEIGHT = 650f;
+    public static final float WORLD_WIDTH = 750f;
+    public static final float WORLD_HEIGHT = 750f;
     private DebugCameraController debugCameraController;
     private MemoryInfo memoryInfo;
     private boolean debug = false;
     private OrthographicCamera camera;
     private Viewport viewport;
     private Viewport hudViewport;
+
+    public static TextureAtlas gameplayAtlas;
+    private AssetManager assetManager;
     private ShapeRenderer renderer;
 
     public SpriteBatch batch;
@@ -78,7 +86,11 @@ public class DuckAttackOOP extends ApplicationAdapter {
         debugCameraController = new DebugCameraController();
         debugCameraController.setStartPosition(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f);
 
+        assetManager = new AssetManager();
+        assetManager.load(AssetDescriptors.GAMEPLAY);
+        assetManager.finishLoading();
 
+        gameplayAtlas = assetManager.get(AssetDescriptors.GAMEPLAY);
 
         memoryInfo = new MemoryInfo(500);
         batch = new SpriteBatch();
@@ -178,10 +190,12 @@ public class DuckAttackOOP extends ApplicationAdapter {
         if (goldenApple != null) {
             goldenApple.update(delta);
             if (goldenApple.isAppleOutOfBounds()) {
+                peApple.reset();
                 goldenApple = null;
             }
             if (goldenApple != null) {
                 if (worm.isCollisionWithGoldenApple(goldenApple)) {
+                    peApple.reset();
                     goldenApple = null;
                 }
             }
@@ -255,6 +269,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
     @Override
     public void dispose() {
         Assets.dispose();
+        assetManager.dispose();
         peApple.dispose();
         peBullet.dispose();
     }
@@ -323,7 +338,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         ScreenUtils.clear(0, 0, 0, 1);
-        batch.draw(Assets.bg, WORLD_WIDTH / 2f - bg.getWidth() / 2f - 50f, (float) (WORLD_HEIGHT - bg.getHeight() / 2f - bg.getHeight() * 0.44));
+        batch.draw(gameplayAtlas.findRegion(RegionNames.BACKGROUND), WORLD_WIDTH / 2f - bg.getWidth() / 2f - 50f, (float) (WORLD_HEIGHT - bg.getHeight() / 2f - bg.getHeight() * 0.44));
 
         worm.render(batch);
         if(goldenApple!=null) peApple.draw(batch, Gdx.graphics.getDeltaTime());

@@ -2,12 +2,14 @@ package com.duckattack.game.OOPImplementation.model;
 
 import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_HEIGHT;
 import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_WIDTH;
+import static com.duckattack.game.OOPImplementation.DuckAttackOOP.gameplayAtlas;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.duckattack.game.OOPImplementation.assets.RegionNames;
 
 public class Duck extends GameObject implements Pool.Poolable {
     private static final float DUCK_SPEED = 200;
@@ -16,12 +18,13 @@ public class Duck extends GameObject implements Pool.Poolable {
     private static float duckSpawnTime;
 
 
+
     public Duck(float x, float y) {
-        super(x, y, Assets.duckImg.getWidth(), Assets.duckImg.getHeight());
+        super(x, y, gameplayAtlas.findRegion(RegionNames.DUCK).getRegionWidth(), gameplayAtlas.findRegion(RegionNames.DUCK).getRegionHeight());
     }
 
     public Duck(){
-        super(MathUtils.random(0, WORLD_WIDTH - Assets.duckImg.getWidth()),WORLD_HEIGHT,Assets.duckImg.getWidth(),Assets.duckImg.getHeight());
+        super(MathUtils.random(0, WORLD_WIDTH - gameplayAtlas.findRegion(RegionNames.BULLET).getRegionWidth()),WORLD_HEIGHT,gameplayAtlas.findRegion(RegionNames.DUCK).getRegionWidth(),gameplayAtlas.findRegion(RegionNames.DUCK).getRegionHeight());
     }
 
     public void init(float posX, float posY) {
@@ -36,7 +39,7 @@ public class Duck extends GameObject implements Pool.Poolable {
 
     @Override
     public void render(SpriteBatch batch) {
-        batch.draw(Assets.duckImg, this.bounds.x, this.bounds.y);
+        batch.draw(gameplayAtlas.findRegion(RegionNames.DUCK), this.bounds.x, this.bounds.y);
     }
 
     public static float getDuckDamage() {
@@ -59,7 +62,7 @@ public class Duck extends GameObject implements Pool.Poolable {
     }
 
     public static Duck spawnDuck() {
-        float x = MathUtils.random(0, WORLD_WIDTH - Assets.duckImg.getWidth());
+        float x = MathUtils.random(0, WORLD_WIDTH - gameplayAtlas.findRegion(RegionNames.DUCK).getRegionWidth());
         float y = WORLD_HEIGHT;
         duckSpawnTime = TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f;
         return new Duck(x, y);
@@ -67,7 +70,7 @@ public class Duck extends GameObject implements Pool.Poolable {
 
     @Override
     public void reset() {
-        this.bounds.x = MathUtils.random(0, WORLD_WIDTH - Assets.duckImg.getWidth());
+        this.bounds.x = MathUtils.random(0, WORLD_WIDTH - gameplayAtlas.findRegion(RegionNames.DUCK).getRegionWidth());
         this.bounds.y = WORLD_HEIGHT;
     }
 }

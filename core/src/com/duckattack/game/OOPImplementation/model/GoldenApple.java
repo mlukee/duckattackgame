@@ -2,12 +2,14 @@ package com.duckattack.game.OOPImplementation.model;
 
 import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_HEIGHT;
 import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_WIDTH;
+import static com.duckattack.game.OOPImplementation.DuckAttackOOP.gameplayAtlas;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.duckattack.game.OOPImplementation.assets.RegionNames;
 
 public class GoldenApple extends GameObject{
     private static final float APPLE_SPEED = 125;
@@ -17,7 +19,7 @@ public class GoldenApple extends GameObject{
 
 
     public GoldenApple(float x, float y) {
-        super(x, y, Assets.goldenAppleImg.getWidth(), Assets.goldenAppleImg.getHeight());
+        super(x, y, gameplayAtlas.findRegion(RegionNames.GOLDEN_APPLE).getRegionWidth(), gameplayAtlas.findRegion(RegionNames.GOLDEN_APPLE).getRegionHeight());
     }
 
     @Override
@@ -27,7 +29,7 @@ public class GoldenApple extends GameObject{
 
     @Override
     public void render(SpriteBatch batch) {
-        batch.draw(Assets.goldenAppleImg, this.bounds.x, this.bounds.y);
+        batch.draw(gameplayAtlas.findRegion(RegionNames.GOLDEN_APPLE), this.bounds.x, this.bounds.y);
     }
 
     public boolean isAppleOutOfBounds() {
@@ -40,7 +42,7 @@ public class GoldenApple extends GameObject{
     }
 
     public static GoldenApple spawnApple() {
-        float x = MathUtils.random(0, WORLD_WIDTH - Assets.appleImg.getWidth());
+        float x = MathUtils.random(0, WORLD_WIDTH - gameplayAtlas.findRegion(RegionNames.GOLDEN_APPLE).getRegionWidth());
         float y = WORLD_HEIGHT;
         appleSpawnTime = TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f;
         return new GoldenApple(x, y);

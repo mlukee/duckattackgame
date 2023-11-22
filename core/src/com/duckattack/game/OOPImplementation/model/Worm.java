@@ -2,6 +2,7 @@ package com.duckattack.game.OOPImplementation.model;
 
 
 import static com.duckattack.game.OOPImplementation.DuckAttackOOP.WORLD_WIDTH;
+import static com.duckattack.game.OOPImplementation.DuckAttackOOP.gameplayAtlas;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.duckattack.game.OOPImplementation.assets.RegionNames;
 
 public class Worm extends GameObject {
     private boolean isMovingLeft = false;
@@ -21,7 +23,7 @@ public class Worm extends GameObject {
 
 
     public Worm(float x, float y) {
-        super(x, y, Assets.wormImg.getWidth(), Assets.wormImg.getHeight());
+        super(x, y, gameplayAtlas.findRegion(RegionNames.WORM).getRegionWidth(), gameplayAtlas.findRegion(RegionNames.WORM).getRegionHeight());
         health = 100;
         applesCollected = 0;
         ducksKilled = 0;
