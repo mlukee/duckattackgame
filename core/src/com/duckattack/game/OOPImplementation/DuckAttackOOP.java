@@ -2,7 +2,6 @@ package com.duckattack.game.OOPImplementation;
 
 import static com.duckattack.game.OOPImplementation.model.Apple.isAppleOutOfBounds;
 import static com.duckattack.game.OOPImplementation.model.Apple.isTimeToSpawnNewApple;
-import static com.duckattack.game.OOPImplementation.model.Assets.bg;
 import static com.duckattack.game.OOPImplementation.model.Assets.drawMemoryInfo;
 import static com.duckattack.game.OOPImplementation.model.Assets.drawText;
 import static com.duckattack.game.OOPImplementation.model.Duck.isDuckHitByBullet;
@@ -78,6 +77,11 @@ public class DuckAttackOOP extends ApplicationAdapter {
     private ParticleEffect peBullet;
 
     private Sound shootSound;
+    private Sound gameOverSound;
+    private Sound duckVoice;
+    private Sound wormHit;
+    private Sound wormEat;
+    private Sound wormDoublePoints;
 
     @Override
     public void create() {
@@ -92,29 +96,43 @@ public class DuckAttackOOP extends ApplicationAdapter {
         assetManager = new AssetManager();
         assetManager.load(AssetDescriptors.GAMEPLAY);
         assetManager.load(AssetDescriptors.SHOOT);
+        assetManager.load(AssetDescriptors.HIT);
+        assetManager.load(AssetDescriptors.QUACK);
+        assetManager.load(AssetDescriptors.GAME_OVER);
+        assetManager.load(AssetDescriptors.EATING);
+        assetManager.load(AssetDescriptors.COLLECTED);
+        assetManager.load(AssetDescriptors.GOLDEN_APPLE_PE);
+        assetManager.load(AssetDescriptors.BULLET_PE);
         assetManager.finishLoading();
 
         gameplayAtlas = assetManager.get(AssetDescriptors.GAMEPLAY);
 
         shootSound = assetManager.get(AssetDescriptors.SHOOT);
+        gameOverSound = assetManager.get(AssetDescriptors.GAME_OVER);
+        duckVoice = assetManager.get(AssetDescriptors.QUACK);
+        wormHit = assetManager.get(AssetDescriptors.HIT);
+        wormEat = assetManager.get(AssetDescriptors.COLLECTED);
+        wormDoublePoints = assetManager.get(AssetDescriptors.EATING);
 
         memoryInfo = new MemoryInfo(500);
         batch = new SpriteBatch();
         ducks = new Array<>();
         apples = new Array<>();
+
+
         Assets.load();
-        worm = new Worm(WORLD_WIDTH / 2f - Assets.wormImg.getWidth() / 2f, 20);
+
+
+        worm = new Worm(WORLD_WIDTH / 2f - gameplayAtlas.findRegion(RegionNames.WORM).getRegionWidth() / 2f, 20);
         ducks.add(Duck.spawnDuck());
         duckPool.fill(2);
         apples.add(Apple.spawnApple());
         applePool.fill(2);
 
-        peApple = new ParticleEffect();
-        peApple.load(Gdx.files.internal("particles/particle.pe"), Gdx.files.internal("particles"));
+        peApple = assetManager.get(AssetDescriptors.GOLDEN_APPLE_PE);
         peApple.start();
 
-        peBullet = new ParticleEffect();
-        peBullet.load(Gdx.files.internal("particles/bulletPE.pe"), Gdx.files.internal("particles"));
+        peBullet = assetManager.get(AssetDescriptors.BULLET_PE);
         peBullet.start();
 
     }
@@ -135,7 +153,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
                 update(Gdx.graphics.getDeltaTime());
                 if (health <= 0) {
                     gameState = GameState.GAME_OVER;
-                    Assets.gameOver.play();
+                    gameOverSound.play();
                 }
                 break;
             case PAUSED:
@@ -201,6 +219,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
             }
             if (goldenApple != null) {
                 if (worm.isCollisionWithGoldenApple(goldenApple)) {
+                    wormDoublePoints.play();
                     peApple.reset();
                     goldenApple = null;
                 }
@@ -220,18 +239,17 @@ public class DuckAttackOOP extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !isBulletFired) {
             isBulletFired = true;
             shootSound.play();
-//            Assets.bulletSound.play();
-            bullet = new Bullet(worm.bounds.x + worm.bounds.width / 2f - Assets.bulletImg.getWidth() / 2f, worm.bounds.y + worm.bounds.height);
+            bullet = new Bullet(worm.bounds.x + worm.bounds.width / 2f - gameplayAtlas.findRegion(RegionNames.BULLET).getRegionWidth() / 2f, worm.bounds.y + worm.bounds.height);
         }
 
         if (isTimeToSpawnNewDuck(pauseDuration)) {
             Duck duck = duckPool.obtain();
-            duck.init(MathUtils.random(0, WORLD_WIDTH - Assets.duckImg.getWidth()), WORLD_HEIGHT);
+            duck.init(MathUtils.random(0, WORLD_WIDTH - gameplayAtlas.findRegion(RegionNames.DUCK).getRegionWidth()), WORLD_HEIGHT);
             ducks.add(Duck.spawnDuck());
         }
         if (isTimeToSpawnNewApple(pauseDuration)) {
             Apple apple = applePool.obtain();
-            apple.init(MathUtils.random(0, WORLD_WIDTH - Assets.appleImg.getWidth()), WORLD_HEIGHT);
+            apple.init(MathUtils.random(0, WORLD_WIDTH - gameplayAtlas.findRegion(RegionNames.APPLE).getRegionWidth()), WORLD_HEIGHT);
             apples.add(Apple.spawnApple());
         }
 
@@ -240,6 +258,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
 
             if (worm.isCollisionWithDuck(duck)) {
                 if (health <= 0) return;
+                wormHit.play();
                 ducks.removeValue(duck, true);
                 duckPool.free(duck);
             }
@@ -250,7 +269,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
             }
 
             if (isBulletFired && isDuckHitByBullet(duck, bullet)) {
-                Assets.duckVoice.play();
+                duckVoice.play();
                 ducksKilled++;
                 ducks.removeValue(duck, true);
                 duckPool.free(duck);
@@ -262,6 +281,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
         for (Apple apple : apples) {
             apple.update(Gdx.graphics.getDeltaTime());
             if (worm.isCollisionWithApple(apple)) {
+                wormEat.play();
                 applePool.free(apple);
                 apples.removeValue(apple, true);
             }
@@ -310,8 +330,8 @@ public class DuckAttackOOP extends ApplicationAdapter {
 
     private void fireBullet() {
         isBulletFired = true;
-        Assets.bulletSound.play();
-        bullet = new Bullet(worm.bounds.x + worm.bounds.width / 2f - Assets.bulletImg.getWidth() / 2f,
+        shootSound.play();
+        bullet = new Bullet(worm.bounds.x + worm.bounds.width / 2f - gameplayAtlas.findRegion(RegionNames.BULLET).getRegionWidth() / 2f,
                 worm.bounds.y + worm.bounds.height);
     }
 
@@ -324,7 +344,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
         applePool.freeAll(apples);
         ducks.clear();
         apples.clear();
-        worm.bounds.x = viewport.getWorldWidth() / 2f - Assets.wormImg.getWidth() / 2f;
+        worm.bounds.x = viewport.getWorldWidth() / 2f - gameplayAtlas.findRegion(RegionNames.WORM).getRegionWidth() / 2f;
         worm.bounds.y = 20;
         goldenApple = null;
         ducks.add(Duck.spawnDuck());
@@ -345,7 +365,7 @@ public class DuckAttackOOP extends ApplicationAdapter {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         ScreenUtils.clear(0, 0, 0, 1);
-        batch.draw(gameplayAtlas.findRegion(RegionNames.BACKGROUND), WORLD_WIDTH / 2f - bg.getWidth() / 2f - 50f, (float) (WORLD_HEIGHT - bg.getHeight() / 2f - bg.getHeight() * 0.44));
+        batch.draw(gameplayAtlas.findRegion(RegionNames.BACKGROUND), WORLD_WIDTH / 2f - gameplayAtlas.findRegion(RegionNames.BACKGROUND).getRegionWidth() / 2f - 50f, (float) (WORLD_HEIGHT - gameplayAtlas.findRegion(RegionNames.BACKGROUND).getRegionHeight() / 2f - gameplayAtlas.findRegion(RegionNames.BACKGROUND).getRegionHeight() * 0.44));
 
         worm.render(batch);
         if(goldenApple!=null) peApple.draw(batch, Gdx.graphics.getDeltaTime());

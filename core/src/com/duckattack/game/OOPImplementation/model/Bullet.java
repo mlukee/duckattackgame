@@ -5,7 +5,6 @@ import static com.duckattack.game.OOPImplementation.DuckAttackOOP.gameplayAtlas;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.duckattack.game.OOPImplementation.assets.RegionNames;
 
-import javax.swing.plaf.synth.Region;
 
 public class Bullet extends GameObject{
     private static final float BULLET_SPEED = 350;

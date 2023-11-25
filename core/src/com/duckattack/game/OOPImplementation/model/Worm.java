@@ -20,6 +20,7 @@ public class Worm extends GameObject {
     public static int applesCollected;
     public static int ducksKilled;
     private float doublePointsDuration;
+    private Sprite wormSprite;
 
 
     public Worm(float x, float y) {
@@ -28,6 +29,7 @@ public class Worm extends GameObject {
         applesCollected = 0;
         ducksKilled = 0;
         doublePointsDuration = 0;
+        wormSprite = new Sprite(gameplayAtlas.findRegion(RegionNames.WORM));
 
     }
 
@@ -45,10 +47,10 @@ public class Worm extends GameObject {
             moveRight(Gdx.graphics.getDeltaTime());
         }
 
-        if (isMovingLeft && !Assets.wormSprite.isFlipX()) {
-            Assets.wormSprite.setFlip(true, false);
-        } else if (!isMovingLeft && Assets.wormSprite.isFlipX()) {
-            Assets.wormSprite.setFlip(false, false);
+        if (isMovingLeft && !wormSprite.isFlipX()) {
+            wormSprite.setFlip(true, false);
+        } else if (!isMovingLeft && wormSprite.isFlipX()) {
+            wormSprite.setFlip(false, false);
         }
         if (doublePointsDuration > 0) {
             doublePointsDuration -= delta;
@@ -70,9 +72,6 @@ public class Worm extends GameObject {
     public boolean isCollisionWithDuck(Duck duck) {
         if (this.bounds.overlaps(duck.bounds)) {
             health -= Duck.getDuckDamage();
-            if (health > 0) {
-                Assets.wormHit.play();
-            }
             return true;
         }
         return false;
@@ -80,7 +79,6 @@ public class Worm extends GameObject {
 
     public boolean isCollisionWithApple(Apple apple) {
         if (this.bounds.overlaps(apple.bounds)) {
-            Assets.collected.play();
             health += Apple.getAppleHealthRegen();
             if (health > 100) health = 100;
             if (isDoublePointsActive()) {
@@ -95,7 +93,6 @@ public class Worm extends GameObject {
 
     public boolean isCollisionWithGoldenApple(GoldenApple apple) {
         if (this.bounds.overlaps(apple.bounds)) {
-            Assets.wormEat.play();
             activateDoublePoints();
             return true;
         }
@@ -105,7 +102,7 @@ public class Worm extends GameObject {
 
     @Override
     public void render(SpriteBatch batch) {
-        batch.draw(Assets.wormSprite, this.bounds.x, this.bounds.y);
+        batch.draw(wormSprite, this.bounds.x, this.bounds.y);
     }
 
     public void moveLeft(float delta) {
