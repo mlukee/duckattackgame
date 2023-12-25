@@ -46,3 +46,8 @@ Duck Attack is a simple single-player arcade game where the player controls a br
 |:--:|
 |**Debug mode**|
 
+### Simulation of bouncing
+The player clicks anywhere on the screen and spawns the ball, which falls and bounces up until it loses momentum.
+![image](https://github.com/mlukee/duckattackgame/assets/31586745/312929d3-6f54-42cb-b8ae-a0a1b953a04d)
+
+
